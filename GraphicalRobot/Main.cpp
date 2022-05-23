@@ -32,6 +32,10 @@ float eyePositionZ;
 float viewAngleX = 0.0;
 float viewAngleZ = 15.0;
 
+GLdouble zoom = 0.0f;
+GLdouble minZoom = -100.0;
+GLdouble maxZoom = 100.0;
+
 float angleArm = 90.0;
 float angleForearm = 45.0;
 float angleHand = 0.0;
@@ -42,6 +46,7 @@ GLfloat lightPosition[4] = { 0.0f, 30.0f, 0.0f, 0.0f };
 GLfloat ambientLight[4] = { 0.19, 0.19, 0.19, 0.0 };
 
 GLuint loadTexture(char* filename);
+void initZooming(void);
 void initLighting(void);
 void initRendering(void);
 
@@ -66,8 +71,10 @@ int main(int argc, char** argv) {
 	glutInitWindowSize(800, 800);
 	glutCreateWindow("Graphical Robot");
 
+	initZooming();
 	initLighting();
 	initRendering();
+
 	glutDisplayFunc(drawScene);
 	glutKeyboardFunc(handleKeyboardInput);
 	glutReshapeFunc(handleWindowReshape);
@@ -118,6 +125,15 @@ GLuint loadTexture(const char* filename) {
 }
 
 
+void initZooming(void)
+{
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	glOrtho(-250, 250, -250, 250, -250, 250);
+}
+
+
 void initLighting(void)
 {
 	glEnable(GL_DEPTH_TEST);
@@ -151,52 +167,56 @@ void initRendering(void)
 void handleKeyboardInput(unsigned char key, int x, int y)
 {
 	switch (key) {
-	case 27: //Escape key
+	case 27: // Escape key
 		exit(0);
-	case 'w': //Increase view angle z axis
+	case 'w': // Increase view angle z axis
 		if (viewAngleZ < 180) viewAngleZ += 3;
 		glutPostRedisplay();
 		break;
-	case 's': //Decrease view angle z axis
+	case 's': // Decrease view angle z axis
 		if (viewAngleZ > 0) viewAngleZ -= 3;
 		glutPostRedisplay();
 		break;
-	case 'a': //Decrease view angle x axis
+	case 'a': // Decrease view angle x axis
 		if (viewAngleX > 0) viewAngleX -= 3;
 		glutPostRedisplay();
 		break;
-	case 'd': //Increase view angle x axis
+	case 'd': // Increase view angle x axis
 		if (viewAngleX < 180) viewAngleX += 3;
 		glutPostRedisplay();
 		break;
-	case 't': //Use texture or not
-		textureOn = !textureOn;
-		glutPostRedisplay();
-		break;
-	case '1': //Increase arm angle
+	case '1': // Increase arm angle
 		angleArm += 3;
 		if (angleArm < 90) angleArm += 3;
 		glutPostRedisplay();
 		break;
-	case '2': //Decrease arm angle
+	case '2': // Decrease arm angle
 		angleArm -= 3;
 		if (angleArm > -90) angleArm -= 3;
 		glutPostRedisplay();
 		break;
-	case '3': //Increase forearm angle
+	case '3': // Increase forearm angle
 		if (angleForearm < 90) angleForearm += 3;
 		glutPostRedisplay();
 		break;
-	case '4': //Decrease forearm angle
+	case '4': // Decrease forearm angle
 		if (angleForearm > -90) angleForearm -= 3;
 		glutPostRedisplay();
 		break;
-	case '5': //Increase clamp angle y axis
+	case '5': // Increase clamp angle y axis
 		if (angleClawY < 60) angleClawY += 3;
 		glutPostRedisplay();
 		break;
-	case '6': //Decrease clamp angle y axis
+	case '6': // Decrease clamp angle y axis
 		if (angleClawY > 0) angleClawY -= 3;
+		glutPostRedisplay();
+		break;
+	case 'x': // Decrease zoom
+		if (zoom < maxZoom) zoom += 5.0;
+		glutPostRedisplay();
+		break;
+	case 'z': // Increase zoom
+		if (zoom > minZoom) zoom -= 5.0;
 		glutPostRedisplay();
 		break;
 	}
@@ -339,11 +359,16 @@ void drawClaw(void)
 void drawScene(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	glEnable(GL_TEXTURE_2D);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	GLdouble ortho = 50.0 + zoom;
+	glOrtho(-ortho, ortho, -ortho, ortho, -250, 250);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	
 	eyePositionX = eyeDistance * cos(viewAngleZ * PI / 180) * cos(viewAngleX * PI / 180);
 	eyePositionY = eyeDistance * cos(viewAngleZ * PI / 180) * sin(viewAngleX * PI / 180);
 	eyePositionZ = eyeDistance * sin(viewAngleZ * PI / 180);
