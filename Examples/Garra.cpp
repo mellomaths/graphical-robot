@@ -2,14 +2,11 @@
 #include <iostream>
 #include <stdlib.h>
 #include <GL/glut.h>
-#include "RgbImage.h"
 
 #define _CRT_SECURE_NO_WARNINGS
 #define PI 3.141592654
 
 using namespace std;
-
-char* filenameTexMetal1 = "./metalTexture1.bmp";
 
 GLuint _textureIdMetal1;
 GLuint _textureIdSphere;
@@ -17,7 +14,7 @@ GLuint _textureIdCylinder;
 GLUquadric* quadSphere;
 GLUquadric* quadCylinder;
 
-bool textureOn = true;
+bool textureOn = false;
 
 float diameterCylinder = 0.3;
 float diameterSphere = 0.4;
@@ -26,9 +23,9 @@ float sizeForearm = 3.0;
 float sizeHand = 2.0;
 float sizeClampPart = 1.0;
 float diameterBase = 2.0;
-float heightBase = 0.5;
+float heightBase = 5.0;
 
-float eyeDistance = 20.0;
+float eyeDistance = 35.0;
 float eyeX;
 float eyeY;
 float eyeZ;
@@ -36,7 +33,7 @@ float viewAngleX = 0.0;
 float viewAngleZ = 15.0;
 
 float angleArm = 90.0;
-float angleForearm = 90.0;
+float angleForearm = 45.0;
 float angleHand = 0.0;
 float angleClampZ = 0.0;
 float angleClampY = 0.0;
@@ -54,16 +51,16 @@ void initLighting(void)
 	glEnable(GL_LIGHT0);
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 
-	// Especifica que a cor de fundo da janela será preta
+	// Especifica que a cor de fundo da janela serï¿½ preta
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-	// Habilita o modelo de colorização de Gouraud
+	// Habilita o modelo de colorizaï¿½ï¿½o de Gouraud
 	glShadeModel(GL_SMOOTH);
 
 	// Ativa o uso da luz ambiente 
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzAmbiente);
 
-	// Define os parâmetros da luz de número 0
+	// Define os parï¿½metros da luz de nï¿½mero 0
 	glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
 	glLightfv(GL_LIGHT0, GL_POSITION, lightposition);
 
@@ -71,31 +68,11 @@ void initLighting(void)
 	glEnable(GL_COLOR_MATERIAL);
 }
 
-//makes the image into a texture, and returns the id of the texture
-GLuint loadTexture(char* filename) {
-	GLuint textureId;
-
-	RgbImage theTexMap(filename); //Image with texture
-
-	glGenTextures(1, &textureId); //Make room for our texture
-	glBindTexture(GL_TEXTURE_2D, textureId);	//Tell OpenGL which texture to edit
-												//Map the image to the texture
-	glTexImage2D(GL_TEXTURE_2D,	//Always GL_TEXTURE_2D
-		0,						//0 for now
-		GL_RGB,					//Format OpenGL uses for image
-		theTexMap.GetNumCols(),	//Width 
-		theTexMap.GetNumRows(),	//Height
-		0,						//The border of the image
-		GL_RGB,					//GL_RGB, because pixels are stored in RGB format
-		GL_UNSIGNED_BYTE,		//GL_UNSIGNED_BYTE, because pixels are stored as unsigned numbers
-		theTexMap.ImageData());	//The actual pixel data
-	return textureId; //Returns the id of the texture
-}
 
 void initRendering(void) {
 	quadSphere = gluNewQuadric();
 	quadCylinder = gluNewQuadric();
-	_textureIdMetal1 = loadTexture(filenameTexMetal1);
+	_textureIdMetal1 = NULL;
 	_textureIdCylinder = _textureIdMetal1;
 	_textureIdSphere = _textureIdMetal1;
 }
@@ -108,7 +85,7 @@ void handleKeypress(unsigned char key, int x, int y) {
 		if (viewAngleZ < 180) viewAngleZ += 3;
 		glutPostRedisplay();
 		break;
-	case 'z': //Decrease view angle z axis
+	case 's': //Decrease view angle z axis
 		if (viewAngleZ > 0) viewAngleZ -= 3;
 		glutPostRedisplay();
 		break;
@@ -116,7 +93,7 @@ void handleKeypress(unsigned char key, int x, int y) {
 		if (viewAngleX > 0) viewAngleX -= 3;
 		glutPostRedisplay();
 		break;
-	case 's': //Increase view angle x axis
+	case 'd': //Increase view angle x axis
 		if (viewAngleX < 180) viewAngleX += 3;
 		glutPostRedisplay();
 		break;
